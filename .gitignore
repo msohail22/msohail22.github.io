@@ -27,3 +27,4 @@ node_modules/
 dist/
 .astro/
 notes-content
+.superpowers/
