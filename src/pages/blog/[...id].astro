@@ -15,17 +15,10 @@ const { Content } = await render(post);
 <Base title={post.data.title} description={post.data.summary}>
   <article>
     <h1>{post.data.title}</h1>
-    <p class="meta">
-      <time datetime={post.data.date.toISOString()}>
-        {post.data.date.toISOString().slice(0, 10)}
-      </time>
-      {post.data.source && (
-        <>
-          {' '}&middot; <a href={post.data.source}>source</a>
-        </>
-      )}
-    </p>
+    {post.data.source && (
+      <p class="meta"><a href={post.data.source}>source</a></p>
+    )}
     <Content />
   </article>
-  <p><a href="/">&larr; all posts</a></p>
+  <p class="back"><a href="/">&larr; all posts</a></p>
 </Base>

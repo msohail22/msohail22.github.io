@@ -17,14 +17,35 @@ const { title, description = 'Notes on C++, databases and the Linux kernel.' } =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap"
+    />
     <link rel="alternate" type="application/rss+xml" title="Mohammed Sohail" href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline>
+      // Set the theme before first paint so the page never flashes the wrong one.
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          if (stored === 'dark' || stored === 'light') {
+            document.documentElement.dataset.theme = stored;
+            return;
+          }
+        } catch (e) {}
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
   </head>
   <body>
     <header>
       <a href="/" class="home">msohail22</a>
       <nav>
-        <a href="/rss.xml">rss</a>
+        <a href="/rss.xml" class="nav-link">rss</a>
         <ThemeToggle client:idle />
       </nav>
     </header>
@@ -32,5 +53,53 @@ const { title, description = 'Notes on C++, databases and the Linux kernel.' } =
     <footer>
       <p>Mohammed Sohail &middot; <a href="https://github.com/msohail22">github</a></p>
     </footer>
+
+    <script>
+      // Give every code block a language label and a copy button.
+      document.querySelectorAll<HTMLPreElement>('pre.astro-code').forEach((pre) => {
+        const parent = pre.parentNode;
+        if (!parent) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'code-wrap';
+        parent.insertBefore(wrap, pre);
+
+        const bar = document.createElement('div');
+        bar.className = 'code-bar';
+
+        const lang = document.createElement('span');
+        lang.className = 'code-lang';
+        lang.textContent = pre.dataset.language ?? 'text';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'code-copy';
+        btn.textContent = 'copy';
+        btn.addEventListener('click', () => {
+          const code = pre.innerText;
+          const done = (label: string) => {
+            btn.textContent = label;
+            window.setTimeout(() => {
+              btn.textContent = 'copy';
+            }, 1400);
+          };
+          navigator.clipboard.writeText(code).then(
+            () => done('copied'),
+            () => {
+              // Clipboard can be refused; fall back to selecting the text.
+              const range = document.createRange();
+              range.selectNodeContents(pre);
+              const sel = window.getSelection();
+              sel?.removeAllRanges();
+              sel?.addRange(range);
+              done('selected');
+            },
+          );
+        });
+
+        bar.append(lang, btn);
+        wrap.append(bar, pre);
+      });
+    </script>
   </body>
 </html>
