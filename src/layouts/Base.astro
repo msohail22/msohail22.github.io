@@ -1,0 +1,36 @@
+---
+import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle';
+
+interface Props {
+  title: string;
+  description?: string | undefined;
+}
+
+const { title, description = 'Notes on C++, databases and the Linux kernel.' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="alternate" type="application/rss+xml" title="Mohammed Sohail" href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body>
+    <header>
+      <a href="/" class="home">msohail22</a>
+      <nav>
+        <a href="/rss.xml">rss</a>
+        <ThemeToggle client:idle />
+      </nav>
+    </header>
+    <main><slot /></main>
+    <footer>
+      <p>Mohammed Sohail &middot; <a href="https://github.com/msohail22">github</a></p>
+    </footer>
+  </body>
+</html>

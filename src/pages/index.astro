@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => data.blog === 'ready')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Base title="Mohammed Sohail">
+  <h1>Mohammed Sohail</h1>
+  <p class="lede">
+    I like building fast, low-level systems. Notes from ClickHouse, the Linux kernel and a homelab.
+  </p>
+  {
+    posts.length === 0 ? (
+      <p>No posts yet.</p>
+    ) : (
+      <ul class="posts">
+        {posts.map((post) => (
+          <li>
+            <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+            <time datetime={post.data.date.toISOString()}>
+              {post.data.date.toISOString().slice(0, 10)}
+            </time>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>
