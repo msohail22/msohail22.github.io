@@ -486,3 +486,44 @@ pre.astro-code code {
   font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.875rem;
 }
+
+/* ---------- terminal ---------- */
+
+.term {
+  margin-block: 2.25rem 0;
+  padding: 0.9rem 1rem;
+  background: var(--paper-sunk);
+  border: 1px solid var(--rule);
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  overflow-x: auto;
+}
+
+/* `pre` on the <code> would render the newlines BETWEEN the line elements as
+   well as the elements themselves, double-spacing the block. Each line keeps
+   `pre` so its leading indent survives; the wrapper collapses the markup. */
+.term code { font: inherit; background: none; border: 0; padding: 0; white-space: normal; }
+
+.term__line { display: block; white-space: pre; }
+.term__line--out { color: var(--ink-muted); }
+.term__prompt { color: var(--index-blue); margin-right: 0.5rem; }
+
+.term__cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 0.15em;
+  background: var(--marker-gold);
+  vertical-align: -0.15em;
+  animation: term-blink 1.1s step-end infinite;
+}
+
+@keyframes term-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term__cursor { animation: none; }
+}

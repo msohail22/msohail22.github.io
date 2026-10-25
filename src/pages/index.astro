@@ -11,9 +11,83 @@ import Base from '../layouts/Base.astro';
     gets written down, from the real patch rather than from memory.
   </p>
 
+  <!-- The lines are written in full in the markup, so the panel reads correctly
+       with no JavaScript, with reduced motion, and in the RSS/text view. The
+       script only hides them again to type them back in. -->
+  <pre class="term" aria-label="A terminal session"><code><span class="term__line"><span class="term__prompt">$</span> ./configure &amp;&amp; make -j16</span>
+<span class="term__line term__line--out">  built in 48s, 0 warnings</span>
+<span class="term__line"><span class="term__prompt">$</span> ./run-tests --strict</span>
+<span class="term__line term__line--out">  412 passed, 0 failed</span>
+<span class="term__line"><span class="term__prompt">$</span> git send-email 0001-fix.patch</span>
+<span class="term__line term__line--out">  patch sent<span class="term__cursor"></span></span></code></pre>
+
   <nav class="links">
     <a href="/blog/">Blog</a>
     <a href="https://github.com/msohail22">GitHub</a>
+    <a href="https://www.linkedin.com/in/sohail-dev/">LinkedIn</a>
+    <a href="https://x.com/msohailx">X</a>
     <a href="/rss.xml">RSS</a>
   </nav>
 </Base>
+
+<script>
+  // Type the terminal out once, then stop. A loop would pull the eye forever.
+  // The markup already holds the finished text, so this only runs when motion
+  // is welcome; otherwise the panel is simply already complete.
+  const pre = document.querySelector('.term');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (pre && !reduced) {
+    const lines = [...pre.querySelectorAll<HTMLElement>('.term__line')];
+    // Reserve the final height first, so nothing below the panel jumps while
+    // it types.
+    pre.style.minHeight = `${pre.getBoundingClientRect().height}px`;
+
+    const texts = lines.map((l) => {
+      const prompt = l.querySelector('.term__prompt');
+      const cursor = l.querySelector('.term__cursor');
+      const body = [...l.childNodes]
+        .filter((n) => n !== prompt && n !== cursor)
+        .map((n) => n.textContent ?? '')
+        .join('');
+      l.dataset.body = body;
+      return body;
+    });
+
+    for (const l of lines) {
+      [...l.childNodes].forEach((n) => {
+        if (!(n instanceof HTMLElement)) n.remove();
+      });
+      l.style.visibility = 'hidden';
+    }
+
+    let i = 0;
+    const typeLine = () => {
+      const line = lines[i];
+      if (!line) return;
+      line.style.visibility = 'visible';
+      const text = texts[i] ?? '';
+      const cursor = line.querySelector('.term__cursor');
+      let c = 0;
+
+      const step = () => {
+        const node = document.createTextNode(text.slice(0, c));
+        const old = [...line.childNodes].find((n) => n.nodeType === 3);
+        if (old) old.replaceWith(node);
+        else if (cursor) line.insertBefore(node, cursor);
+        else line.append(node);
+
+        if (c < text.length) {
+          c += 1;
+          // Output lines appear at once; only typed commands are keyed out.
+          setTimeout(step, line.classList.contains('term__line--out') ? 0 : 18);
+        } else {
+          i += 1;
+          setTimeout(typeLine, line.classList.contains('term__line--out') ? 320 : 120);
+        }
+      };
+      step();
+    };
+    typeLine();
+  }
+</script>
