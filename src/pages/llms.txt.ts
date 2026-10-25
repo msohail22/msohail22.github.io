@@ -13,7 +13,7 @@ export async function GET(context: APIContext) {
   const lines = [
     '# Mohammed Sohail',
     '',
-    '> Notes on C++, databases and the Linux kernel, written from real contributions.',
+    '> Notes written from real work, not from memory.',
     '> Each post cites the pull request, patch or thread it came out of.',
     '',
     'Posts are written from first principles: how a thing is implemented, the design',
