@@ -1,0 +1,336 @@
+/* Homepage only. The post page is a reading surface and keeps global.css
+   untouched; nothing here leaks because every rule sits under .chaos. */
+
+.chaos {
+  /* Phase 2 palette — OKLCH, four named roles, "full palette" commitment.
+     No pure black or white anywhere: every neutral is tinted toward the ink
+     hue, with chroma dropped as lightness approaches the ends. */
+  --bone: oklch(0.96 0.009 85);
+  --bone-sunk: oklch(0.92 0.012 85);
+  --ink: oklch(0.17 0.018 275);
+  --ink-soft: oklch(0.42 0.02 275);
+  /* 5.9:1 on --ink. The obvious 0.52 lightness reaches only 3.3:1, which fails
+     WCAG AA for small text — measured, not guessed. */
+  --signal: oklch(0.66 0.19 262);
+  --flare: oklch(0.63 0.19 38);
+  --acid: oklch(0.88 0.17 108);
+
+  --display: 'Bricolage Grotesque', 'Archivo Black', Georgia, serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  position: relative;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: var(--ink);
+  color: var(--bone);
+  overflow-x: clip;
+}
+
+/* The homepage is drenched, so it overrides the page chrome rather than
+   sitting inside it. */
+body:has(.chaos) { padding-inline: 0; background: var(--ink); }
+body:has(.chaos) > header,
+body:has(.chaos) > footer { max-width: 74rem; padding-inline: 1.5rem; }
+body:has(.chaos) > header { color: var(--bone); border-bottom: 1px solid oklch(1 0 0 / 0.12); }
+body:has(.chaos) > header a { color: var(--bone); }
+
+/* Grain. One repeating SVG, no image request, sits above the background and
+   below everything else. */
+.chaos::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+.chaos > * { position: relative; z-index: 1; }
+
+/* ---------- hero ---------- */
+
+.hero {
+  display: grid;
+  /* Deliberately uneven: the type column is wider and the object is pushed
+     off-centre. An even split is the "AI slop" hero the skill rejects. */
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+  max-width: 74rem;
+  margin-inline: auto;
+  padding: clamp(2.5rem, 7vw, 6rem) 1.5rem clamp(3rem, 6vw, 5rem);
+}
+
+.hero__kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--acid);
+}
+
+.hero__kicker::before {
+  content: '';
+  width: 2.5rem;
+  height: 1px;
+  background: var(--acid);
+}
+
+.hero__title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  /* Oversized and tight. The clamp floor keeps it from wrapping badly at 320px. */
+  font-size: clamp(2.75rem, 11vw, 7.5rem);
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+/* Grid-breaking: the second line hangs left of the column and the third is
+   pushed right, so the block reads on a diagonal. */
+.hero__title span { display: block; }
+.hero__title span:nth-child(2) { margin-left: clamp(0rem, 6vw, 4.5rem); color: var(--flare); }
+.hero__title span:nth-child(3) { margin-left: clamp(0rem, 2vw, 1.5rem); -webkit-text-stroke: 1px var(--bone); color: transparent; }
+
+.hero__lede {
+  max-width: 34ch;
+  margin: 1.75rem 0 0;
+  color: var(--bone);
+  opacity: 0.74;
+  font-size: clamp(1rem, 1.6vw, 1.1875rem);
+  line-height: 1.55;
+}
+
+.hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* 44px minimum touch target. */
+  min-height: 44px;
+  margin-top: 2rem;
+  padding: 0.6rem 1.15rem;
+  border: 1px solid var(--acid);
+  background: transparent;
+  color: var(--acid);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.hero__cta:hover { background: var(--acid); color: var(--ink); }
+
+.hero__stage {
+  position: relative;
+  aspect-ratio: 1;
+  min-height: 15rem;
+}
+
+.hero__stage canvas { display: block; width: 100%; height: 100%; }
+
+/* Shown until (or instead of) the 3D object: the same silhouette as a static
+   SVG, so the layout never collapses and reduced-motion users still get the
+   shape. */
+.hero__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--signal);
+}
+
+.hero__stage[data-live='true'] .hero__fallback { opacity: 0; }
+
+/* ---------- marquee ---------- */
+
+.marquee {
+  display: flex;
+  gap: 0;
+  overflow: clip;
+  padding-block: 0.7rem;
+  border-block: 1px solid oklch(1 0 0 / 0.14);
+  background: var(--flare);
+  color: var(--ink);
+  user-select: none;
+}
+
+.marquee__row {
+  display: flex;
+  flex: none;
+  gap: 2.5rem;
+  padding-right: 2.5rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: slide 38s linear infinite;
+}
+
+.marquee:hover .marquee__row { animation-play-state: paused; }
+
+@keyframes slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* ---------- work ---------- */
+
+.work {
+  max-width: 74rem;
+  margin-inline: auto;
+  padding: clamp(3rem, 7vw, 5.5rem) 1.5rem 1rem;
+}
+
+.section-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 1.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid oklch(1 0 0 / 0.16);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--acid);
+}
+
+.section-label span:last-child { color: var(--bone); opacity: 0.45; }
+
+/* Bento: deliberately uneven spans so the grid never reads as a table. */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  background: oklch(1 0 0 / 0.14);
+  border: 1px solid oklch(1 0 0 / 0.14);
+}
+
+.bento__cell {
+  grid-column: span 2;
+  padding: 1.4rem 1.3rem;
+  background: var(--ink);
+  transition: background 0.2s ease;
+}
+
+.bento__cell--wide { grid-column: span 4; }
+.bento__cell--tall { grid-row: span 2; }
+.bento__cell:hover { background: oklch(0.22 0.03 275); }
+
+.bento__cell h3 {
+  margin: 0 0 0.5rem;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.bento__cell p { margin: 0; color: var(--bone); opacity: 0.6; font-size: 0.9375rem; line-height: 1.5; }
+
+.bento__tag {
+  display: inline-block;
+  margin-bottom: 0.7rem;
+  font-family: var(--mono);
+  /* 0.625rem is 10px; bumped so the uppercase tracking stays legible. */
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+/* ---------- writing ---------- */
+
+.writing { max-width: 74rem; margin-inline: auto; padding: clamp(2.5rem, 6vw, 4.5rem) 1.5rem 5rem; }
+
+.feed { list-style: none; padding: 0; margin: 0; }
+
+.feed > li { border-top: 1px solid oklch(1 0 0 / 0.14); }
+.feed > li:last-child { border-bottom: 1px solid oklch(1 0 0 / 0.14); }
+
+.feed__link {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 1.5rem;
+  padding: 1.5rem 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.18s ease, padding-left 0.18s ease;
+}
+
+.feed__link:hover { background: oklch(1 0 0 / 0.045); padding-left: 1.25rem; }
+
+.feed__date {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--acid);
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.35rem;
+}
+
+.feed__title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(1.25rem, 2.6vw, 1.875rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.feed__summary { margin: 0.5rem 0 0; color: var(--bone); opacity: 0.6; font-size: 0.9375rem; line-height: 1.55; }
+
+.feed__meta {
+  margin: 0.7rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bone);
+  opacity: 0.4;
+}
+
+.feed__empty { padding: 2rem 0; color: var(--bone); opacity: 0.55; }
+
+/* ---------- entrance ---------- */
+
+/* Reveal on scroll, driven by an IntersectionObserver adding [data-seen].
+   Everything is visible by default, so a failed script or no JS leaves the
+   page fully readable rather than blank. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  .reveal[data-seen] { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__row { animation: none; }
+  .hero__cta, .bento__cell, .feed__link { transition: none; }
+}
+
+:where(.chaos) a:focus-visible,
+:where(.chaos) button:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+
+/* ---------- narrow ---------- */
+
+@media (max-width: 54rem) {
+  .hero { grid-template-columns: 1fr; gap: 1.5rem; }
+  .hero__stage { order: -1; max-width: 20rem; justify-self: start; }
+  .hero__title span:nth-child(2),
+  .hero__title span:nth-child(3) { margin-left: 0; }
+  .bento__cell,
+  .bento__cell--wide { grid-column: span 6; }
+  .bento__cell--tall { grid-row: auto; }
+  .feed__link { grid-template-columns: 1fr; gap: 0.35rem; }
+  .feed__date { padding-top: 0; }
+}
