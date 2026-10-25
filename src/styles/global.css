@@ -277,7 +277,11 @@ th {
   background: var(--paper-sunk);
   border: 1px solid var(--rule);
   padding: 0.05em 0.3em;
-  white-space: nowrap;
+  /* `pre-wrap` keeps the spaces inside a token like `x == true` intact but
+     still lets a long path break, instead of `nowrap` pushing it off the side
+     of a phone screen. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .code-wrap { margin-block: 1.5rem; border: 1px solid var(--rule); background: var(--paper-sunk); }

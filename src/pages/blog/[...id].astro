@@ -105,40 +105,4 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     a.setAttribute('aria-label', `Link to ${h.textContent ?? 'this section'}`);
     h.append(a);
   }
-
-  // Wrap each code block in the bar the stylesheet already defines, and give it
-  // a copy button. The language comes from the class Shiki leaves on <pre>.
-  for (const pre of document.querySelectorAll<HTMLPreElement>('article pre.astro-code')) {
-    const wrap = document.createElement('div');
-    wrap.className = 'code-wrap';
-
-    const bar = document.createElement('div');
-    bar.className = 'code-bar';
-
-    const lang = document.createElement('span');
-    lang.className = 'code-lang';
-    lang.textContent = pre.dataset.language ?? '';
-
-    const copy = document.createElement('button');
-    copy.className = 'code-copy';
-    copy.type = 'button';
-    copy.textContent = 'copy';
-
-    copy.addEventListener('click', async () => {
-      const text = pre.querySelector('code')?.textContent ?? '';
-      try {
-        await navigator.clipboard.writeText(text);
-        copy.textContent = 'copied';
-      } catch {
-        // Clipboard is blocked without HTTPS or permission. Say so rather than
-        // flashing "copied" over a copy that never happened.
-        copy.textContent = 'failed';
-      }
-      setTimeout(() => (copy.textContent = 'copy'), 1500);
-    });
-
-    bar.append(lang, copy);
-    pre.replaceWith(wrap);
-    wrap.append(bar, pre);
-  }
 </script>

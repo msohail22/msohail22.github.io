@@ -54,17 +54,39 @@ export function mountHero(canvas: HTMLCanvasElement): Teardown {
   const env = environmentTexture(renderer);
   scene.environment = env;
 
+  // Real lights as well as the environment map. A PMREM env map is the only
+  // thing shading a metallic surface, and if it fails — software WebGL, a
+  // context without float render targets — the object renders pure black with
+  // no error. Explicit lights mean the hero is always lit; the env map adds
+  // the colour on top where it works.
+  scene.add(new THREE.HemisphereLight(0xf4f1eb, 0x12121a, 1.1));
+
+  const key = new THREE.DirectionalLight(0xffffff, 2.6);
+  key.position.set(3, 4, 5);
+  scene.add(key);
+
+  const rim = new THREE.DirectionalLight(0xe4531f, 2.2);
+  rim.position.set(-4, -1.5, -3);
+  scene.add(rim);
+
+  const fill = new THREE.DirectionalLight(0x4e8cff, 1.6);
+  fill.position.set(-3, 2.5, 2);
+  scene.add(fill);
+
   const geometry = new THREE.IcosahedronGeometry(1.25, 0);
   const material = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#0d0d14'),
-    metalness: 0.35,
-    roughness: 0.12,
+    // Near-metal with a light base: at metalness 1 the surface IS its
+    // reflection, so the object picks up the palette in the environment map.
+    // A dark base here renders as a black silhouette on a dark page.
+    color: new THREE.Color('#b8c0d8'),
+    metalness: 0.92,
+    roughness: 0.28,
     iridescence: 1,
-    iridescenceIOR: 1.8,
-    iridescenceThicknessRange: [120, 560],
+    iridescenceIOR: 1.9,
+    iridescenceThicknessRange: [180, 620],
     clearcoat: 1,
-    clearcoatRoughness: 0.08,
-    envMapIntensity: 1.25,
+    clearcoatRoughness: 0.1,
+    envMapIntensity: 1.7,
   });
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);

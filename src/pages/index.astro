@@ -36,7 +36,7 @@ const work = [
   },
   { tag: 'LLVM', title: 'libc float128', body: 'Exponent decomposition on targets where long double is not 128-bit.', cls: '' },
   { tag: 'low-level-lab', title: 'A moderated question system', body: 'Better Auth, OpenFGA authorization boundaries, CRUD foundations.', cls: '' },
-  { tag: 'Home server', title: 'Things that broke at 2am', body: 'The rollbacks are written down too.', cls: '' },
+  { tag: 'Home server', title: 'Things that broke at 2am', body: 'The rollbacks are written down too.', cls: 'bento__cell--full' },
 ];
 ---
 
@@ -83,9 +83,9 @@ const work = [
 
     <section class="work">
       <p class="section-label"><span>Where the work lands</span><span>01</span></p>
-      <div class="bento">
+      <div class="bento reveal">
         {work.map((w) => (
-          <article class={`bento__cell reveal ${w.cls}`}>
+          <article class={`bento__cell ${w.cls}`}>
             <span class="bento__tag">{w.tag}</span>
             <h3>{w.title}</h3>
             <p>{w.body}</p>
@@ -131,6 +131,8 @@ const work = [
   // never load-bearing for reading the page.
   const reveals = document.querySelectorAll('.reveal');
   if (reveals.length) {
+    // Only now is it safe for CSS to hide them.
+    document.documentElement.dataset.reveal = '';
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {

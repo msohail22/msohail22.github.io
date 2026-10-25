@@ -1,39 +1,45 @@
 /* Homepage only. The post page is a reading surface and keeps global.css
-   untouched; nothing here leaks because every rule sits under .chaos. */
+   untouched; nothing here leaks because every rule sits under .chaos.
+
+   Tokens are `--c-` prefixed on purpose. global.css already owns `--ink` and
+   `--paper`; reusing those names here would silently repaint the post page. */
+:root {
+  --c-bone: oklch(0.96 0.009 85);
+  --c-bone-sunk: oklch(0.92 0.012 85);
+  --c-ink: oklch(0.17 0.018 275);
+  --c-ink-lift: oklch(0.22 0.03 275);
+  --c-ink-soft: oklch(0.42 0.02 275);
+  /* 5.9:1 on --c-ink. The obvious 0.52 lightness reaches only 3.3:1, which
+     fails WCAG AA for small text — measured, not guessed. */
+  --c-signal: oklch(0.66 0.19 262);
+  --c-flare: oklch(0.63 0.19 38);
+  --c-acid: oklch(0.88 0.17 108);
+
+  --c-display: 'Bricolage Grotesque', 'Archivo Black', Georgia, serif;
+  --c-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 
 .chaos {
-  /* Phase 2 palette — OKLCH, four named roles, "full palette" commitment.
-     No pure black or white anywhere: every neutral is tinted toward the ink
-     hue, with chroma dropped as lightness approaches the ends. */
-  --bone: oklch(0.96 0.009 85);
-  --bone-sunk: oklch(0.92 0.012 85);
-  --ink: oklch(0.17 0.018 275);
-  --ink-soft: oklch(0.42 0.02 275);
-  /* 5.9:1 on --ink. The obvious 0.52 lightness reaches only 3.3:1, which fails
-     WCAG AA for small text — measured, not guessed. */
-  --signal: oklch(0.66 0.19 262);
-  --flare: oklch(0.63 0.19 38);
-  --acid: oklch(0.88 0.17 108);
-
-  --display: 'Bricolage Grotesque', 'Archivo Black', Georgia, serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-
   position: relative;
   max-width: none;
   margin: 0;
   padding: 0;
-  background: var(--ink);
-  color: var(--bone);
+  background: var(--c-ink);
+  color: var(--c-bone);
   overflow-x: clip;
 }
 
 /* The homepage is drenched, so it overrides the page chrome rather than
    sitting inside it. */
-body:has(.chaos) { padding-inline: 0; background: var(--ink); }
+body:has(.chaos) { padding-inline: 0; background: var(--c-ink); color: var(--c-bone); }
+/* global.css caps header/main/footer at the 40rem reading measure. The homepage
+   is not a reading surface, so main has to be released or every 74rem section
+   inside it overflows a 640px column. */
+body:has(.chaos) > main { max-width: none; margin-inline: 0; }
 body:has(.chaos) > header,
 body:has(.chaos) > footer { max-width: 74rem; padding-inline: 1.5rem; }
-body:has(.chaos) > header { color: var(--bone); border-bottom: 1px solid oklch(1 0 0 / 0.12); }
-body:has(.chaos) > header a { color: var(--bone); }
+body:has(.chaos) > header { color: var(--c-bone); border-bottom: 1px solid oklch(1 0 0 / 0.12); }
+body:has(.chaos) > header a { color: var(--c-bone); }
 
 /* Grain. One repeating SVG, no image request, sits above the background and
    below everything else. */
@@ -68,23 +74,23 @@ body:has(.chaos) > header a { color: var(--bone); }
   align-items: center;
   gap: 0.6rem;
   margin: 0 0 1.1rem;
-  font-family: var(--mono);
+  font-family: var(--c-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--acid);
+  color: var(--c-acid);
 }
 
 .hero__kicker::before {
   content: '';
   width: 2.5rem;
   height: 1px;
-  background: var(--acid);
+  background: var(--c-acid);
 }
 
 .hero__title {
   margin: 0;
-  font-family: var(--display);
+  font-family: var(--c-display);
   font-weight: 800;
   /* Oversized and tight. The clamp floor keeps it from wrapping badly at 320px. */
   font-size: clamp(2.75rem, 11vw, 7.5rem);
@@ -96,13 +102,23 @@ body:has(.chaos) > header a { color: var(--bone); }
 /* Grid-breaking: the second line hangs left of the column and the third is
    pushed right, so the block reads on a diagonal. */
 .hero__title span { display: block; }
-.hero__title span:nth-child(2) { margin-left: clamp(0rem, 6vw, 4.5rem); color: var(--flare); }
-.hero__title span:nth-child(3) { margin-left: clamp(0rem, 2vw, 1.5rem); -webkit-text-stroke: 1px var(--bone); color: transparent; }
+.hero__title span:nth-child(2) { margin-left: clamp(0rem, 6vw, 4.5rem); color: var(--c-flare); }
+/* Outlined, NOT `color: transparent`. Bricolage Grotesque at 800 has glyphs
+   that nest into their neighbours; a solid fill paints over the overlap, while
+   a transparent one exposes every contour and the word reads as a scribble.
+   An opaque fill in the page colour keeps the outline look and hides the
+   overlap — the same trick the diagrams use. Verified in a browser. */
+.hero__title span:nth-child(3) {
+  margin-left: clamp(0rem, 2vw, 1.5rem);
+  -webkit-text-stroke: 1.5px var(--c-bone);
+  color: var(--c-ink);
+  letter-spacing: 0.01em;
+}
 
 .hero__lede {
   max-width: 34ch;
   margin: 1.75rem 0 0;
-  color: var(--bone);
+  color: var(--c-bone);
   opacity: 0.74;
   font-size: clamp(1rem, 1.6vw, 1.1875rem);
   line-height: 1.55;
@@ -116,10 +132,10 @@ body:has(.chaos) > header a { color: var(--bone); }
   min-height: 44px;
   margin-top: 2rem;
   padding: 0.6rem 1.15rem;
-  border: 1px solid var(--acid);
+  border: 1px solid var(--c-acid);
   background: transparent;
-  color: var(--acid);
-  font-family: var(--mono);
+  color: var(--c-acid);
+  font-family: var(--c-mono);
   font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -127,7 +143,7 @@ body:has(.chaos) > header a { color: var(--bone); }
   transition: background 0.18s ease, color 0.18s ease;
 }
 
-.hero__cta:hover { background: var(--acid); color: var(--ink); }
+.hero__cta:hover { background: var(--c-acid); color: var(--c-ink); }
 
 .hero__stage {
   position: relative;
@@ -145,7 +161,7 @@ body:has(.chaos) > header a { color: var(--bone); }
   inset: 0;
   display: grid;
   place-items: center;
-  color: var(--signal);
+  color: var(--c-signal);
 }
 
 .hero__stage[data-live='true'] .hero__fallback { opacity: 0; }
@@ -158,8 +174,8 @@ body:has(.chaos) > header a { color: var(--bone); }
   overflow: clip;
   padding-block: 0.7rem;
   border-block: 1px solid oklch(1 0 0 / 0.14);
-  background: var(--flare);
-  color: var(--ink);
+  background: var(--c-flare);
+  color: var(--c-ink);
   user-select: none;
 }
 
@@ -168,7 +184,7 @@ body:has(.chaos) > header a { color: var(--bone); }
   flex: none;
   gap: 2.5rem;
   padding-right: 2.5rem;
-  font-family: var(--mono);
+  font-family: var(--c-mono);
   font-size: 0.8125rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -198,14 +214,14 @@ body:has(.chaos) > header a { color: var(--bone); }
   margin: 0 0 1.75rem;
   padding-bottom: 0.6rem;
   border-bottom: 1px solid oklch(1 0 0 / 0.16);
-  font-family: var(--mono);
+  font-family: var(--c-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--acid);
+  color: var(--c-acid);
 }
 
-.section-label span:last-child { color: var(--bone); opacity: 0.45; }
+.section-label span:last-child { color: var(--c-bone); opacity: 0.45; }
 
 /* Bento: deliberately uneven spans so the grid never reads as a table. */
 .bento {
@@ -219,33 +235,36 @@ body:has(.chaos) > header a { color: var(--bone); }
 .bento__cell {
   grid-column: span 2;
   padding: 1.4rem 1.3rem;
-  background: var(--ink);
+  background: var(--c-ink);
   transition: background 0.2s ease;
 }
 
 .bento__cell--wide { grid-column: span 4; }
+/* The grid's own background shows through any track a cell does not fill, so
+   the last cell is stretched to close the row. */
+.bento__cell--full { grid-column: 1 / -1; }
 .bento__cell--tall { grid-row: span 2; }
-.bento__cell:hover { background: oklch(0.22 0.03 275); }
+.bento__cell:hover { background: var(--c-ink-lift); }
 
 .bento__cell h3 {
   margin: 0 0 0.5rem;
-  font-family: var(--display);
+  font-family: var(--c-display);
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.015em;
 }
 
-.bento__cell p { margin: 0; color: var(--bone); opacity: 0.6; font-size: 0.9375rem; line-height: 1.5; }
+.bento__cell p { margin: 0; color: var(--c-bone); opacity: 0.6; font-size: 0.9375rem; line-height: 1.5; }
 
 .bento__tag {
   display: inline-block;
   margin-bottom: 0.7rem;
-  font-family: var(--mono);
+  font-family: var(--c-mono);
   /* 0.625rem is 10px; bumped so the uppercase tracking stays legible. */
   font-size: 0.6875rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--signal);
+  color: var(--c-signal);
 }
 
 /* ---------- writing ---------- */
@@ -270,44 +289,49 @@ body:has(.chaos) > header a { color: var(--bone); }
 .feed__link:hover { background: oklch(1 0 0 / 0.045); padding-left: 1.25rem; }
 
 .feed__date {
-  font-family: var(--mono);
+  font-family: var(--c-mono);
   font-size: 0.75rem;
-  color: var(--acid);
+  color: var(--c-acid);
   font-variant-numeric: tabular-nums;
   padding-top: 0.35rem;
 }
 
 .feed__title {
   margin: 0;
-  font-family: var(--display);
+  font-family: var(--c-display);
   font-size: clamp(1.25rem, 2.6vw, 1.875rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
 
-.feed__summary { margin: 0.5rem 0 0; color: var(--bone); opacity: 0.6; font-size: 0.9375rem; line-height: 1.55; }
+.feed__summary { margin: 0.5rem 0 0; color: var(--c-bone); opacity: 0.6; font-size: 0.9375rem; line-height: 1.55; }
 
 .feed__meta {
   margin: 0.7rem 0 0;
-  font-family: var(--mono);
+  font-family: var(--c-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--bone);
+  color: var(--c-bone);
   opacity: 0.4;
 }
 
-.feed__empty { padding: 2rem 0; color: var(--bone); opacity: 0.55; }
+.feed__empty { padding: 2rem 0; color: var(--c-bone); opacity: 0.55; }
 
 /* ---------- entrance ---------- */
 
 /* Reveal on scroll, driven by an IntersectionObserver adding [data-seen].
    Everything is visible by default, so a failed script or no JS leaves the
    page fully readable rather than blank. */
+/* Hidden ONLY once the script has confirmed it is running, via the attribute
+   it sets on <html>. Without that gate a failed or blocked script leaves every
+   revealed element permanently invisible — and because the bento draws its
+   dividers as a light background behind the cells, an invisible cell reads as
+   a grey hole rather than as missing content. */
 @media (prefers-reduced-motion: no-preference) {
-  .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-  .reveal[data-seen] { opacity: 1; transform: none; }
+  [data-reveal] .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  [data-reveal] .reveal[data-seen] { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -317,7 +341,7 @@ body:has(.chaos) > header a { color: var(--bone); }
 
 :where(.chaos) a:focus-visible,
 :where(.chaos) button:focus-visible {
-  outline: 2px solid var(--acid);
+  outline: 2px solid var(--c-acid);
   outline-offset: 3px;
 }
 
