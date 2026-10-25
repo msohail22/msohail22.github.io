@@ -23,6 +23,7 @@ export async function GET(context: APIContext) {
     '',
     '## Posts',
     '',
+    `- [All posts](${site}/blog/): the index of everything below.`,
   ];
 
   for (const post of posts) {

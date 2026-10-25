@@ -139,22 +139,18 @@ footer p { margin: 0; }
 
 a { color: var(--index-blue); text-underline-offset: 2px; }
 
-h1, h2, h3 {
-  font-family: 'Bricolage Grotesque', Spectral, Georgia, serif;
-}
-
 h1 {
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
   text-wrap: balance;
   margin-block: 0 0.75rem;
 }
 
 h2 {
-  font-size: 1.4375rem;
-  font-weight: 700;
+  font-size: 1.3125rem;
+  font-weight: 600;
   line-height: 1.3;
   text-wrap: balance;
   margin-block: 3rem 0.75rem;
@@ -208,8 +204,6 @@ h3 { font-size: 1.0625rem; font-weight: 600; margin-block: 2rem 0.5rem; }
   text-transform: uppercase;
   color: var(--ink-muted);
 }
-
-.posts__topic::before { content: '/ '; }
 
 .posts__summary {
   margin-block: 0.4rem 0;
@@ -478,4 +472,17 @@ pre.astro-code code {
 
 @media (prefers-reduced-motion: reduce) {
   .anchor { transition: none; }
+}
+
+/* ---------- home links ---------- */
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875rem;
 }

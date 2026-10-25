@@ -9,7 +9,7 @@ export async function GET(context: APIContext) {
     (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
   );
 
-  const urls = [`${site}/`, ...posts.map((post) => `${site}/blog/${post.id}/`)];
+  const urls = [`${site}/`, `${site}/blog/`, ...posts.map((post) => `${site}/blog/${post.id}/`)];
 
   return new Response(urls.join('\n') + '\n', {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
