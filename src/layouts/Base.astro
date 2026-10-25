@@ -5,9 +5,15 @@ import ThemeToggle from '../components/ThemeToggle';
 interface Props {
   title: string;
   description?: string | undefined;
+  /** Post id, when this page is a post. Enables the Markdown alternate link. */
+  markdownFor?: string | undefined;
 }
 
-const { title, description = 'Notes on C++, databases and the Linux kernel.' } = Astro.props;
+const {
+  title,
+  description = 'Notes on C++, databases and the Linux kernel.',
+  markdownFor,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -26,6 +32,12 @@ const { title, description = 'Notes on C++, databases and the Linux kernel.' } =
     />
     <link rel="alternate" type="application/rss+xml" title="Mohammed Sohail" href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+    {/* llms.txt discovery: the Markdown twin of this page, and the index covering it. */}
+    {markdownFor && (
+      <link rel="alternate" type="text/markdown" href={`/blog/${markdownFor}.md`} />
+    )}
+    <link rel="describedby" type="text/markdown" href="/llms.txt" />
     <script is:inline>
       // Set the theme before first paint so the page never flashes the wrong one.
       (function () {

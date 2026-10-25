@@ -4,21 +4,141 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = await getCollection('blog', ({ data }) => data.blog === 'ready');
-  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+  const posts = (await getCollection('blog', ({ data }) => data.blog === 'ready')).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+  );
+  // Newest first, so the *previous* post in reading order is the next index along.
+  return posts.map((post, i) => ({
+    params: { id: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
 };
 
-const { post } = Astro.props as { post: CollectionEntry<'blog'> };
-const { Content } = await render(post);
+type Props = {
+  post: CollectionEntry<'blog'>;
+  newer?: CollectionEntry<'blog'>;
+  older?: CollectionEntry<'blog'>;
+};
+
+const { post, newer, older } = Astro.props as Props;
+const { Content, headings } = await render(post);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+// 200 wpm is the usual prose figure. Code reads slower, but rounding up one
+// minute is honest enough and avoids pretending to a precision we do not have.
+const words = (post.body ?? '').split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 200));
+
+// Only h2 and h3: deeper levels make the contents longer than the section it points at.
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
-<Base title={post.data.title} description={post.data.summary}>
+<Base title={post.data.title} description={post.data.summary} markdownFor={post.id}>
   <article>
     <h1>{post.data.title}</h1>
-    {post.data.source && (
-      <p class="meta"><a href={post.data.source}>source</a></p>
+    <p class="meta">
+      <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
+      <span class="meta__sep">·</span>{minutes} min read
+      <span class="meta__sep">·</span>{post.data.topic}
+      {post.data.source && (
+        <>
+          <span class="meta__sep">·</span><a href={post.data.source}>source</a>
+        </>
+      )}
+    </p>
+
+    {toc.length > 2 && (
+      <nav class="toc" aria-label="Contents">
+        <p class="toc__label">Contents</p>
+        <ol>
+          {toc.map((h) => (
+            <li data-depth={h.depth}>
+              <a href={`#${h.slug}`}>{h.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
     )}
+
     <Content />
+
+    {post.data.tags.length > 0 && (
+      <ul class="tags tags--footer">
+        {post.data.tags.map((tag) => (
+          <li>{tag}</li>
+        ))}
+      </ul>
+    )}
   </article>
+
+  {(newer || older) && (
+    <nav class="pager" aria-label="More posts">
+      {older && (
+        <a class="pager__link" href={`/blog/${older.id}/`} rel="prev">
+          <span class="pager__dir">&larr; Older</span>
+          <span class="pager__title">{older.data.title}</span>
+        </a>
+      )}
+      {newer && (
+        <a class="pager__link pager__link--next" href={`/blog/${newer.id}/`} rel="next">
+          <span class="pager__dir">Newer &rarr;</span>
+          <span class="pager__title">{newer.data.title}</span>
+        </a>
+      )}
+    </nav>
+  )}
+
   <p class="back"><a href="/">&larr; all posts</a></p>
 </Base>
+
+<script>
+  // Heading anchors. Astro already gives every heading an id, so this only adds
+  // the handle to click. Done in script rather than a rehype plugin to avoid a
+  // new dependency for six lines of work.
+  for (const h of document.querySelectorAll<HTMLElement>('article h2[id], article h3[id]')) {
+    const a = document.createElement('a');
+    a.className = 'anchor';
+    a.href = `#${h.id}`;
+    a.textContent = '#';
+    a.setAttribute('aria-label', `Link to ${h.textContent ?? 'this section'}`);
+    h.append(a);
+  }
+
+  // Wrap each code block in the bar the stylesheet already defines, and give it
+  // a copy button. The language comes from the class Shiki leaves on <pre>.
+  for (const pre of document.querySelectorAll<HTMLPreElement>('article pre.astro-code')) {
+    const wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+
+    const bar = document.createElement('div');
+    bar.className = 'code-bar';
+
+    const lang = document.createElement('span');
+    lang.className = 'code-lang';
+    lang.textContent = pre.dataset.language ?? '';
+
+    const copy = document.createElement('button');
+    copy.className = 'code-copy';
+    copy.type = 'button';
+    copy.textContent = 'copy';
+
+    copy.addEventListener('click', async () => {
+      const text = pre.querySelector('code')?.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        copy.textContent = 'copied';
+      } catch {
+        // Clipboard is blocked without HTTPS or permission. Say so rather than
+        // flashing "copied" over a copy that never happened.
+        copy.textContent = 'failed';
+      }
+      setTimeout(() => (copy.textContent = 'copy'), 1500);
+    });
+
+    bar.append(lang, copy);
+    pre.replaceWith(wrap);
+    wrap.append(bar, pre);
+  }
+</script>
